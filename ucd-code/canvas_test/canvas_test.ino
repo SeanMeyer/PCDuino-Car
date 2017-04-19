@@ -86,7 +86,7 @@ void setup() {
 
 void loop() {
   printf("looping \n");
-  printf("read device test: %d", 0x52)
+  printf("read device test: %d", 0x52);
   delay(1);
   printf("laser1: %d\n", lasers.readRange());
   delay(500);

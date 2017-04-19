@@ -65,7 +65,7 @@
 class Adafruit_VL6180X {
  public:
   Adafruit_VL6180X();
-  boolean begin(void);
+  boolean begin(uint8_t I2C_ADDR);
   uint8_t readRange(void);
   float   readLux(uint8_t gain);
   uint8_t readRangeStatus(void);
