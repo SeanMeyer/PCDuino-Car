@@ -28,7 +28,7 @@ long microsecondsToInches(long microseconds)
 
 long microsecondsToCentimeters(long microseconds)
 {
-	return (microsecodns / 29 / 2);
+	return (microseconds / 29 / 2);
 }
 
 void setup()
@@ -56,4 +56,5 @@ void loop()
 	cm = microsecondsToCentimeters(duration);
 	printf("%d in, %d cm \n", inches, cm);
 	delay(80);
+	forward();
 }
