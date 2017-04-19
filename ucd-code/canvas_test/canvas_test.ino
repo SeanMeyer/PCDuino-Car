@@ -16,14 +16,62 @@ extern "C" {
 }
 #include "Adafruit_VL6180X.h"
 
-Adafruit_VL6180X lasers;
-  byte laser1SHDNPin = 7; // SHutDowN pin
+  Adafruit_VL6180X laser1;
+  byte laser1GPIOPin = 3;
+  byte laser1SHDNPin = 4;
+
+  Adafruit_VL6180X laser2;
   byte laser2SHDNPin = 6;
+
+/*******************************************************************************
+* Function name : DetectVL6180X
+* Description : DetectVL6180X
+* Input : I2CDevAddr
+* Output : None
+* Return : Failure
+*******************************************************************************/
+u8 DetectVL6180X (u8 I2CDevAddr)
+{
+  u8 i, DeviceID;
+  for (i=0; i<10; i++)
+  {
+    DeviceID = I2C_VL6180XReadByte(I2CDevAddr, 0x00);
+    Delay(20);
+    if (DeviceID == 0xB4)
+      {
+      return 0;
+      }
+  }
+  return 1;
+}
+
+/*******************************************************************************
+* Function name : ChangeVL6180XI2CAddr
+* Description : ChangeVL6180XI2CAddr
+* Input : CurrentI2CDevAddr, NewI2CDevAddr
+* Output : None
+* Return : Failure
+*******************************************************************************/
+u8 ChangeVL6180XI2CAddr (u8 CurrentI2CDevAddr, u8 NewI2CDevAddr)
+{
+  u8 Failure;
+  Failure = I2C_VL6180XByteWrite (CurrentI2CDevAddr, 0x0212, NewI2CDevAddr / 2);
+  if (Failure != 0x00)
+  {
+    return 1;
+  }
+  else
+  {
+    return 0;
+  }
+}
+
 
 void setup() {
   printf("starting");
   
   Wire.begin();
+  laser1.begin(0x29);
   /*
    // Doesn't work
   digitalWrite(laser2SHDNPin, LOW);  // Disable laser2 before...
@@ -37,8 +85,8 @@ void setup() {
 }
 
 void loop() {
-  printf("\tlooping");
-  lasers.begin();
+  printf("looping \n");
+  printf("read device test: %d", 0x52)
   delay(1);
   printf("laser1: %d\n", lasers.readRange());
   delay(500);
