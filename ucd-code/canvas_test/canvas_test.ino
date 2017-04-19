@@ -71,7 +71,8 @@ void setup() {
   printf("starting");
   
   Wire.begin();
-  laser1.begin(0x29);
+  digitalWrite(laser1SHDNPin, HIGH);
+  laser1.begin(0x80);  
   /*
    // Doesn't work
   digitalWrite(laser2SHDNPin, LOW);  // Disable laser2 before...
@@ -86,8 +87,7 @@ void setup() {
 
 void loop() {
   printf("looping \n");
-  printf("read device test: %d", 0x52);
   delay(1);
-  printf("laser1: %d\n", lasers.readRange());
+  printf("laser1: %d\n", laser1.readRange());
   delay(500);
 }
