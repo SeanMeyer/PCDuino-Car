@@ -1,7 +1,7 @@
 #include <core.h>
 
-const int trig = 1;
-const int echo = 2;
+const int trig = 4;
+const int echo = 3;
 
 #define pinI1 8		// pins 1 + 2 is the right motor. 1 low, 2 high is forwards.
 #define pinI2 11
