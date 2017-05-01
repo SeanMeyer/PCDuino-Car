@@ -8,8 +8,8 @@ extern "C" {
 
 #include <core.h>
 
-const int trig = 4;
-const int echo = 3;
+const int trig = 3;
+const int echo = 4;
 
 #define pinI1 8   // pins 1 + 2 is the right motor. 1 low, 2 high is forwards.
 #define pinI2 11
@@ -43,8 +43,23 @@ void startCar()
 
 void stopCar()
 {
-  analogWrite(speedpinA, 0);
-  analogWrite(speedpinB, 0);
+  digitalWrite(speedpinA, LOW);
+  digitalWrite(speedpinB, LOW);
+}
+
+void setMotor(char motor, int newSpeed)
+{
+  switch(motor) {
+    case 'L':
+    case 'l':
+      analogWrite(speedpinA, newSpeed);
+      break;
+    case 'R':
+    case 'r':
+      analogWrite(speedpinB, newSpeed);
+      break;
+  }
+  return;
 }
 
 void backward()
@@ -87,9 +102,10 @@ long microsecondsToCentimeters(long microseconds)
   return (microseconds / 29 / 2);
 }
 
-long getUltraDistance(void)
+int getUltraDistance(void)
 {
-  long duration, cm;
+  long duration;
+  int cm;
   digitalWrite(trig, HIGH);
   delayMicroseconds(20);
   digitalWrite(trig, LOW);
@@ -98,18 +114,22 @@ long getUltraDistance(void)
   return cm;
 }
 
-long getLaserDistance(char laser)
+int getDistance(char laser)
 {
   int mm;
   switch(laser) {
     case 'L':
     case 'l':
-      mm = laser2.readRange();
+      return laser2.readRange() / 10;
+      break;
     case 'R':
     case 'r':
-      mm = laser1.readRange();
+      return laser1.readRange() / 10;
+      break;
+    case 'F':
+    case 'f':
+      return getUltraDistance();
   }
-  return mm / 10;
 }
 
 void setup() {
@@ -144,8 +164,8 @@ void setup() {
 
 void loop() {
   printf("looping \n");
-  printf("Left: %d\n", getLaserDistance('L'));
-  printf("Right: %d\n", getLaserDistance('R'));
-  printf("Front: %d\n", getUltraDistance());
+  printf("Left: %d\n", getDistance('L'));
+  printf("Right: %d\n", getDistance('R'));
+  printf("Front: %d\n", getDistance('F'));
   delay(500);
 }
