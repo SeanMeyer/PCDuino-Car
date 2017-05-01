@@ -10,7 +10,7 @@ extern "C" {
   byte laser1SHDNPin = 1;
 
   Adafruit_VL6180X laser2;
-  byte laser2SHDNPin = 2;
+  byte laser2SHDNPin = 7;
 
 void setup() {
   printf("starting");
