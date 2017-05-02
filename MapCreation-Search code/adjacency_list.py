@@ -13,7 +13,7 @@ class Node:
         self.connectedTo.append(neighbor)
 
     def __str__(self):
-        return str(self.id) + ' connectedTo: ' + str([x.id for x in self.connectedTo])
+        return str(self.id) + ' connected to: ' + str([x.id for x in self.connectedTo])
 
     def get_connections(self):
         return self.connectedTo
@@ -73,7 +73,8 @@ class Map:
 
 def make_map():
     graph = Map()
-    with open("C:/Users/ameen/Documents/GitHub/PCDuino-Car/MapCreation-Search code/Embedded_Map.txt", "r") as mapp:
+    # Using the relative file path to access the adjacency map file
+    with open("Embedded_Map.txt", "r") as mapp:
         for line in mapp:
             data_list = line.split(';')
             node_main = str(data_list[0])
