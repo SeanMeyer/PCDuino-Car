@@ -161,41 +161,172 @@ double difference(int left, int right) {
     return ((double) sub / total);
 }
 
-void driveStraight() {
-    double percentDif;
-    int leftLaser = getDistance('l');
-    int rightLaser = getDistance('r');
-    percentDif = difference(leftLaser, rightLaser);
-    char motor1 = 'l';
-    char motor2 = 'r';
-    if (leftLaser > rightLaser) {
-        motor1 = 'r';
-        motor2 = 'l';
+double getDiff() {
+    return difference(getDistance('l'), getDistance('r'));
+}
+
+void equalPower(int power) {
+    setMotor('l', power);
+    setMotor('r', power);
+    return;
+}
+
+char other(char side) {
+    if (side == 'l') {
+        return 'r';
+    } else {
+        return 'l';
+    }
+}
+
+char getSmaller(int l, int r) {
+    if (l < r) {
+        return 'l';
+    } else {
+        return 'r';
+    }
+}
+
+void rotate(char foward, int time) {
+    equalPower(0);
+    setMotor( foward, minMove);
+    setMotor( other(foward), - minMove);
+    delay (time);
+    equalPower(0);
+}
+
+void fixRotation() {
+    int lDist = getDistance('l');
+    int rDist = getDistance('r');
+    char smaller = getSmaller(lDist, rDist);
+
+    //Straighten out.
+    int smallerDist = getDistance(smaller);
+    int lastSmallerDist;
+    do {
+        rotate(smaller, 50);
+        lastSmallerDist = smallerDist;
+        smallerDist = getDistance(smaller);
+    } while (smallerDist <= lastSmallerDist);
+    rotate(other(smaller), 50);
+    lastSmallerDist = smallerDist;
+    do {
+        rotate(other(smaller), 50);
+        lastSmallerDist = smallerDist;
+        smallerDist = getDistance(smaller);
+    } while (smallerDist <= lastSmallerDist);
+    rotate(smaller, 50);
+}
+
+void centerCar() {
+    int lDist = getDistance('l');
+    int rDist = getDistance('r');
+    double lastDiff, currDiff;
+    char smaller = getSmaller(lDist, rDist);
+
+    currDiff = difference(lDist, rDist);
+    do {
+        setMotor(smaller, round(minMove * 1.25));
+        setMotor(other(smaller), minMove);
+        delay(100);
+        setMotor(smaller, minMove);
+        setMotor(other(smaller), round(minMove * 1.25));
+        stopCar();
+        lastDiff = currDiff;
+        currDiff = getDiff();
+    } while (lastDiff > currDiff);
+}
+
+void driveFoward() {
+    int run = 4;
+    int fDist;
+    int lDist = getDistance('l');
+    int rDist = getDistance('r');
+    int lMotor, rMotor, smotor;
+    double lastDiff;
+    double currDiff = difference(lDist, rDist);
+    char smaller;
+
+    //Initial Call
+    //  Do things if (and only if) the car is not centered/straight
+    if ( currDiff >= 0.15 ) {
+        //Lets try to correct.
+        fixRotation();
+        centerCar();
     }
 
-    //Stop if no wall
-    if (leftLaser == 25 || rightLaser == 25) {
-      stopCar();
-      while(1) {
-        delay(50);
-      }
-    }
 
-    //Limit motor changes
-    if (getMotor(motor1) >= 90) {
-      setMotor(motor1, 89);
-    } else if (getMotor(motor2) >= 90) {
-      setMotor(motor2, 89);
-    }
-    //Drive straight
-    else {
-      if (percentDif > 0.25) {
-        setMotor( motor1, (int) round(getMotor(motor1)*(1 + (percentDif / 2))));
-        setMotor( motor2, (int) round(getMotor(motor2)*(1 - (percentDif / 2))));  
-      } else {
-        startCar();
-      }
-    }
+    //Main go.
+    run = 4;
+    startCar();
+    do {
+        //Initilize variables for use
+        fDist = getDistance('f');
+        lDist = getDistance('l');
+        rDist = getDistance('r');
+        lMotor = getMotor('l');
+        rMotor = getMotor('r');
+        ++run;
+        if (run == 5) {
+            printf ("Left: %d Right: %d Fowrd: %d -- ML: %d MR: %d", lDist, rDist, fDist, lMotor, rMotor);
+            run = 0;
+        }
+        if (fDist <= 10) {
+            printf("Front <= 10, Stopping");
+            stopCar();
+            return;
+        /* Option #1
+        } else {
+            currDiff = difference(lDist, rDist);
+            delay (100);
+            lastDiff = currDiff;
+            currDiff = getDiff();
+            smaller = getSmaller(getDistance('l'), getDistance('r'));
+            if (currDiff - lastDiff >= 0.05) {
+                
+                sdist = getDistance(smaller)
+                do {
+                    setMotor(smaller, getMotor(smaller) + 1);
+                    setMotor(other(smaller), getMotor(other(smaller)) - 1);
+                    delay(50);
+                }while(sdist > getDistance(smaller));
+            } else if (currDiff > 0.20) {
+                smaller = getSmaller(lDist, rDist);
+                do {
+                    smotor = getMotor(smaller);
+                    setMotor(smaller, round(getMotor(smaller) * 1.25));
+                    delay(50);
+                    setMotor(smaller, smotor);
+                    smotor = getMotor(other(smaller));
+                    setMotor(other(smaller), round(getMotor(other(smaller)) * 1.25));
+                    delay(50);
+                    setMotor(other(smaller), smotor);
+                    lastDiff = currDiff;
+                    currDiff = getDiff();
+                } while(currDiff < lastDiff);
+            }
+        }
+        */
+        /*
+        } else {
+            smaller= getSmaller(lDist, rDist);
+            int sdist = getDistance(smaller);
+            delay(50);
+            if (sdist > getDistance(smaller)) {
+                sdist = getDistance(smaller)
+                do {
+                    setMotor(smaller, getMotor(smaller) + 1);
+                    setMotor(other(smaller), getMotor(other(smaller)) - 1);
+                    delay(50);
+                }while(sdist > getDistance(smaller));
+            }
+        }
+        */
+        }
+    } while (lDist != 25 || rDist != 25);
+    stopCar();
+    printf("Stoped because inf laser reading");
+    return;
 }
 
 void setup() {
@@ -231,14 +362,11 @@ void setup() {
 }
 
 void loop() {
-  printf("Left: %d  Right: %d,  Front: %d\n\n", getDistance('L'), getDistance('R'), getDistance('F'));
-  printf("          Motor Left: %d   Motor Right: %d\n\n", getMotor('L'), getMotor('R'));
-  if (getDistance('f') <= 20) {
-    printf("Stopping Motors\n");
     stopCar();
-    return;
-  } else {
-    driveStraight();
-  }
-  delay(100);
+    startCar();
+    //this while is loop
+    driveFoward();
+    while(1) {
+        //Stop doing stuff
+    }
 }
