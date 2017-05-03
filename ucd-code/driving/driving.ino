@@ -55,14 +55,26 @@ void setMotor(char motor, int newSpeed)
   switch(motor) {
     case 'L':
     case 'l':
+      if (newSpeed < 0 && leftSpeed > 0) {
+        digitalWrite(pinI4, HIGH);
+        digitalWrite(pinI3, LOW);
+      } else if (newSpeed > 0 && leftSpeed < 0) {
+        digitalWrite(pinI4, LOW);
+        digitalWrite(pinI3, HIGH);
+      }
       analogWrite(speedpinB, newSpeed);
       leftSpeed = newSpeed;
-      break;
     case 'R':
     case 'r':
+      if (newSpeed < 0 && rightSpeed > 0) {
+        digitalWrite(pinI2, HIGH);
+        digitalWrite(pinI1, LOW);
+      } else if (newSpeed > 0 && rightSpeed < 0) {
+        digitalWrite(pinI2, LOW);
+        digitalWrite(pinI1, HIGH);
+      }
       analogWrite(speedpinA, newSpeed);
       rightSpeed = newSpeed;
-      break;
   }
   return;
 }
@@ -357,13 +369,10 @@ void setup() {
 
   digitalWrite(laser2SHDNPin, HIGH);
   laser2.begin(0x86);
-
-  startCar();
 }
 
 void loop() {
     stopCar();
-    startCar();
     //this while is loop
     driveFoward();
     while(1) {
