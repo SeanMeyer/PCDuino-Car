@@ -342,26 +342,29 @@ void driveFoward() {
         diffs[run] = difference(lDist, rDist);
         lDists[run] = lDist;
         rDists[run] = rDist;
+        fDists[run] = fDist;
 
-        if (fDist <= 100) {
-            printf("Front <= 10, Stopping. \n");
-            stopCar();
-            return;
-        } else if (run == 5) {
-            run = 0;
-            printf ("Left: %d Right: %d Fowrd: %d -- ML: %d MR: %d \n\n", lDist, rDist, fDist, lMotor, rMotor);
-            //If the difference is trending upwords (car is getting worse)
-            int x = diffs[0] + diffs[1] + diffs[2] / 3;
-            int y = difsf[3] + diffs[4] + diffs[5] / 3;
-            if (y - x > 0.05) {
-                printf("--Drift Detected. %f -> %f \n", x, y);
-                smaller = getSmaller( (lDists[4] + lDists[5] / 2), (rDists[4] + rDists[5] /2));
-                printf("---Increase %c by 1 \n", smaller);
-                setMotor(smaller, getMotor(smaller) + 1);
+        if (run == 5) {
+            int favg = fDists[0] + fDists[1] + fDists[2] + fDists[3] + fDists[4] fDists[5] / 6
+            if (favg <= 5) {
+                printf("Front <= 10, Stopping. \n");
+                stopCar();
+                return;
+            } else
+                run = 0;
+                printf ("Left: %d Right: %d Fowrd: %d -- ML: %d MR: %d \n\n", lDist, rDist, fDist, lMotor, rMotor);
+                //If the difference is trending upwords (car is getting worse)
+                int x = diffs[0] + diffs[1] + diffs[2] / 3;
+                int y = difsf[3] + diffs[4] + diffs[5] / 3;
+                if (y - x > 0.05) {
+                    printf("--Drift Detected. %f -> %f \n", x, y);
+                    smaller = getSmaller( (lDists[4] + lDists[5] / 2), (rDists[4] + rDists[5] /2));
+                    printf("---Increase %c by 1 \n", smaller);
+                    setMotor(smaller, getMotor(smaller) + 1);
+                }
             }
-        }
-    run++;
-    delay(15);
+        run++;
+        delay(15);
     } while (lDist != 25 || rDist != 25);
     stopCar();
     printf("Stoped because inf laser reading. \n");
