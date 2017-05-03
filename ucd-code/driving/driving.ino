@@ -18,10 +18,10 @@ const int echo = 4;
 #define speedpinA 9
 #define speedpinB 10
 
-#define speed 30
+#define speed 35
 int leftSpeed = speed;
 int rightSpeed = speed;
-int minMove = 25;
+int minMove = 30;
 
 Adafruit_VL6180X laser1;
 byte laser1SHDNPin = 1;
@@ -56,44 +56,45 @@ void setMotor(char motor, int newSpeed)
   switch(motor) {
     case 'L':
     case 'l':
-      printf("Setting left motor\n");
-      if (newSpeed < 0 && leftSpeed > 0) {
-        printf("Setting motor to backwards\n");
+      //printf("Setting left motor\n");
+      if (newSpeed < 0 && (leftSpeed > 0 || leftSpeed == 0)) {
+        //printf("Setting motor to backwards\n");
         analogWrite(speedpinB, 0);
-        delay(50);
+        delay(5);
         digitalWrite(pinI4, HIGH);
         digitalWrite(pinI3, LOW);
-      } else if (newSpeed > 0 && leftSpeed < 0) {
-        printf("Setting motor to forwards\n");
+      } else if (newSpeed > 0 && (leftSpeed < 0 || leftSpeed == 0)) {
+        //printf("Setting motor to forwards\n");
         analogWrite(speedpinB, 0);
-        delay(50);
+        delay(5);
         digitalWrite(pinI4, LOW);
         digitalWrite(pinI3, HIGH);
       }
-      printf("Doing the analog write\n");
+      //printf("Doing the analog write\n");
       analogWrite(speedpinB, abs(newSpeed));
       leftSpeed = newSpeed;
+      return;
     case 'R':
     case 'r':
-      printf("Setting right motor\n");
-      if (newSpeed < 0 && rightSpeed > 0) {
-        printf("Setting motor to backwards\n");
+      //printf("Setting right motor\n");
+      if (newSpeed < 0 && (rightSpeed > 0 || rightSpeed == 0)) {
+        //printf("Setting motor to backwards\n");
         analogWrite(speedpinA, 0);
-        delay(50);
+        delay(5);
         digitalWrite(pinI2, HIGH);
         digitalWrite(pinI1, LOW);
-      } else if (newSpeed > 0 && rightSpeed < 0) {
-        printf("Setting motor to forwards\n");
+      } else if (newSpeed > 0 && (rightSpeed < 0 || rightSpeed == 0)) {
+        //printf("Setting motor to forwards\n");
         analogWrite(speedpinA, 0);
-        delay(50);
+        delay(5);
         digitalWrite(pinI2, LOW);
         digitalWrite(pinI1, HIGH);
       }
-      printf("Doing the analog write\n");
+      //printf("Doing the analog write\n");
       analogWrite(speedpinA, abs(newSpeed));
       rightSpeed = newSpeed;
+      return;
   }
-  return;
 }
 
 void startCar()
@@ -147,16 +148,21 @@ long microsecondsToCentimeters(long microseconds)
   return (microseconds / 29 / 2);
 }
 
+long microsecondsToMillimeters(long microseconds)
+{
+  return (microseconds / 2.9411 / 2);
+}
+
 int getUltraDistance(void)
 {
   long duration;
-  int cm;
+  int mm;
   digitalWrite(trig, HIGH);
   delayMicroseconds(20);
   digitalWrite(trig, LOW);
   duration = pulseIn(echo, HIGH, 1000000);
-  cm = microsecondsToCentimeters(duration);
-  return cm;
+  mm = microsecondsToCentimeters(duration);
+  return mm;
 }
 
 int getDistance(char laser)
@@ -216,38 +222,45 @@ char getSmaller(int l, int r) {
     }
 }
 
-void rotate(char foward, int time) {
-    equalPower(0);
-    setMotor( foward, minMove);
-    setMotor( other(foward), - minMove);
+void rotate(char forward, int time) {
+    setMotor( forward, minMove);
+    setMotor( other(forward), -minMove);
     delay (time);
-    equalPower(0);
 }
 
 void fixRotation() {
     int lDist = getDistance('l');
     int rDist = getDistance('r');
-    printf("Left: %d   Right: %d\n", lDist, rDist);
+    int fDist;
+    //printf("Left: %d   Right: %d\n", lDist, rDist);
     char smaller = getSmaller(lDist, rDist);
 
     //Straighten out.
     int smallerDist = getDistance(smaller);
     int lastSmallerDist;
-    printf("Entering first while\n");
+    int rotationDelay = 40;
+    printf("Attempting to rotate\n");
+    printf("     Left: %d, Right: %d, smaller: %c\n", lDist, rDist, smaller);
     do {
-        rotate(smaller, 50);
+        rotate(smaller, rotationDelay);
         lastSmallerDist = smallerDist;
         smallerDist = getDistance(smaller);
-    } while (smallerDist <= lastSmallerDist);
-    rotate(other(smaller), 50);
+        fDist = getDistance('f');
+        printf("         %cDist: %d, last-%cDist: %d, fDist: %d\n", smaller, smallerDist, smaller, lastSmallerDist, fDist);
+    } while (smallerDist <= lastSmallerDist || fDist < 25);
+    //rotate(other(smaller), rotationDelay);
+    equalPower(0);
+    /*
     lastSmallerDist = smallerDist;
     printf("Entering second while\n");
     do {
-        rotate(other(smaller), 50);
+        rotate(other(smaller), rotationDelay);
         lastSmallerDist = smallerDist;
         smallerDist = getDistance(smaller);
     } while (smallerDist <= lastSmallerDist);
-    rotate(smaller, 50);
+    rotate(smaller, rotationDelay);
+    equalPower(0);
+    */
 }
 
 void centerCar() {
@@ -256,17 +269,24 @@ void centerCar() {
     double lastDiff, currDiff;
     char smaller = getSmaller(lDist, rDist);
 
+    printf("In centerCar.\n");
     currDiff = difference(lDist, rDist);
-    do {
-        setMotor(smaller, round(minMove * 1.25));
-        setMotor(other(smaller), minMove);
-        delay(100);
-        setMotor(smaller, minMove);
-        setMotor(other(smaller), round(minMove * 1.25));
-        stopCar();
-        lastDiff = currDiff;
-        currDiff = getDiff();
-    } while (lastDiff > currDiff);
+    if (currDiff > 0.25) {
+      printf("      Car needs to be centered.\n");
+      do {
+          setMotor(smaller, round(minMove * 1.25));
+          setMotor(other(smaller), minMove);
+          delay(200);
+          setMotor(smaller, minMove);
+          setMotor(other(smaller), round(minMove * 1.25));
+          delay(100);
+          lastDiff = currDiff;
+          currDiff = getDiff();
+      } while (lastDiff > currDiff);
+      printf("      Done centering car.\n");
+      equalPower(0);
+    }
+    printf("Exit center car.\n");
 }
 
 void driveFoward() {
@@ -292,8 +312,9 @@ void driveFoward() {
 
 
     //Main go.
-    run = 4;
-    startCar();
+    printf("Attempting to drive foward.\n");
+    equalPower(speed);
+    printf("     go.");
     do {
         //Initilize variables for use
         fDist = getDistance('f');
@@ -306,11 +327,10 @@ void driveFoward() {
             printf ("Left: %d Right: %d Fowrd: %d -- ML: %d MR: %d", lDist, rDist, fDist, lMotor, rMotor);
             run = 0;
         }
-        if (fDist <= 10) {
+        if (fDist <= 100) {
             printf("Front <= 10, Stopping");
             stopCar();
             return;
-        /* Option #1
         } else {
             currDiff = difference(lDist, rDist);
             delay (100);
@@ -319,7 +339,7 @@ void driveFoward() {
             smaller = getSmaller(getDistance('l'), getDistance('r'));
             if (currDiff - lastDiff >= 0.05) {
                 
-                sdist = getDistance(smaller)
+                int sdist = getDistance(smaller);
                 do {
                     setMotor(smaller, getMotor(smaller) + 1);
                     setMotor(other(smaller), getMotor(other(smaller)) - 1);
@@ -341,8 +361,7 @@ void driveFoward() {
                 } while(currDiff < lastDiff);
             }
         }
-        */
-        /*
+        /* option 2
         } else {
             smaller= getSmaller(lDist, rDist);
             int sdist = getDistance(smaller);
@@ -357,7 +376,6 @@ void driveFoward() {
             }
         }
         */
-        }
     } while (lDist != 25 || rDist != 25);
     stopCar();
     printf("Stoped because inf laser reading");
@@ -407,19 +425,12 @@ void setup() {
 }
 
 void loop() {
-    //stopCar();
+    stopCar();
     int lDist = getDistance('l');
     int rDist = getDistance('r');
     printf("Left: %d   Right: %d\n", lDist, rDist);
     //this while is loop
-    //driveFoward();
-    setMotor('l', 40);
-    setMotor('r', 40);
-    printf("Going forwards at 30\n");
-    delay(3000);
-    setMotor('l', 40);
-    setMotor('r', -40);
-    printf("Left forward at 30, right backwards at 30\n");
+    driveFoward();
     while(1) {
       delay(5000);
         //Stop doing stuff
