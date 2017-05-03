@@ -21,6 +21,7 @@ const int echo = 4;
 #define speed 30
 int leftSpeed = speed;
 int rightSpeed = speed;
+int minMove = 25;
 
 Adafruit_VL6180X laser1;
 byte laser1SHDNPin = 1;
