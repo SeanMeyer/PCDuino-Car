@@ -255,7 +255,7 @@ void fixRotation() {
         smallerDist = getDistance(smaller);
         fDist = getDistance('f');
         printf("         %cDist: %d, last-%cDist: %d, fDist: %d\n", smaller, smallerDist, smaller, lastSmallerDist, fDist);
-    } while (smallerDist <= lastSmallerDist || fDist < 25);
+    } while (smallerDist <= lastSmallerDist || fDist < 10);
     //rotate(other(smaller), rotationDelay);
     equalPower(0);
     /*
@@ -359,7 +359,9 @@ void driveFoward() {
                     //setMotor(other(smaller), getMotor(other(smaller)) - 1);
                     delay(100);
                 }while(sdist > getDistance(smaller));
-            } else if (currDiff > 0.20) {
+            } 
+            /*
+            else if (currDiff > 0.20) {
                 printf("Uncentered == True \n");
                 smaller = getSmaller(lDist, rDist);
                 do {
@@ -375,6 +377,7 @@ void driveFoward() {
                     currDiff = getDiff();
                 } while(currDiff < lastDiff);
             }
+            */
         }
         /* option 2
         } else {
