@@ -18,10 +18,10 @@ const int echo = 4;
 #define speedpinA 9
 #define speedpinB 10
 
-#define speed 35
+#define speed 30
 int leftSpeed = speed;
 int rightSpeed = speed;
-int minMove = 30;
+int minMove = 25;
 
 Adafruit_VL6180X laser1;
 byte laser1SHDNPin = 1;
@@ -256,7 +256,9 @@ void fixRotation() {
         fDist = getDistance('f');
         printf("         %cDist: %d, last-%cDist: %d, fDist: %d\n", smaller, smallerDist, smaller, lastSmallerDist, fDist);
     } while (smallerDist <= lastSmallerDist || fDist < 10);
-    //rotate(other(smaller), rotationDelay);
+    equalPower(0);
+    delay(100);
+    rotate(other(smaller), rotationDelay * 2);
     equalPower(0);
     /*
     lastSmallerDist = smallerDist;
