@@ -7,7 +7,7 @@ class Node:
         self.blocked = False
         self.chckpnt = False
         self.connectedTo = []
-        # connectedTo is set up as {up,right,down,left}
+        # connectedTo is set up as [up,right,down,left]
 
     def add_neighbor(self, neighbor):
         self.connectedTo.append(neighbor)

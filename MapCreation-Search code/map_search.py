@@ -43,45 +43,36 @@ class BreadthSearch:
                         node = Tree(tree.data.connectedTo[i], "left", tree)
                         queue.put(node)
 
-    def get_adjacent(self, tree, queue):
-        for i in range(0, 4):
-            if tree.data.connectedTo[i].id != 'null':
-                self.get_neighbors(tree.data.connectedTo[i], queue)
-
     def is_goal(self, goal):
-        if goal == "J10":
+        if goal == 'J10':
             return True
         else:
             return False
 
-
-    #def make_path(self, temp):
-        # do stuff here
+    def make_path(self, tree):
+        p = []
+        while tree.parent is not None:
+            p.append(tree.data.id)
+            tree = tree.parent
+        p.append(tree.data.id)
+        path = list(reversed(p))
+        return path
 
     def search(self):
         tree = Tree(self.current_node, "null", None)
         opened = Queue()
+        path = []
         closed = {}
-        opened.put(tree)
-        help = opened.get()
-        print help.data
-        opened.put(help)
-        self.get_neighbors(tree, opened, closed)
-        opened.get()
-        tree = opened.get()
         opened.put(tree)
         while not opened.empty():
             help = opened.get()
-            closed[help.data.id] = help
-            print help.data
+            closed[help.data.id] = help.data.id
+            tree = help
+            if self.is_goal(tree.data.id) is True:
+                path = self.make_path(tree)
+                break
             self.get_neighbors(tree, opened, closed)
-#        while not opened.empty():
-#           if self.is_goal("J10"):
-#                #self.make_path()
-#               break
-#            self.get_adjacent(tree, opened)
-#            print opened
-
+        print path
 
 def main(argv):
     amap = adjacency_list.make_map()
