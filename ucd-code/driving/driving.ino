@@ -228,6 +228,14 @@ void rotate(char forward, int time) {
     delay (time);
 }
 
+bool shouldRun(int lDist, int rDist) {
+  if (lDist != 25 || rDist != 25) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 void fixRotation() {
     int lDist = getDistance('l');
     int rDist = getDistance('r');
@@ -313,8 +321,10 @@ void driveFoward() {
 
     //Main go.
     printf("Attempting to drive foward.\n");
+    equalPower(0);
+    delay(50);
     equalPower(speed);
-    printf("     go.");
+    printf("Go.\n");
     do {
         //Initilize variables for use
         fDist = getDistance('f');
@@ -322,30 +332,35 @@ void driveFoward() {
         rDist = getDistance('r');
         lMotor = getMotor('l');
         rMotor = getMotor('r');
-        ++run;
+        run++;
         if (run == 5) {
-            printf ("Left: %d Right: %d Fowrd: %d -- ML: %d MR: %d", lDist, rDist, fDist, lMotor, rMotor);
+            printf ("Left: %d Right: %d Fowrd: %d -- ML: %d MR: %d \n\n", lDist, rDist, fDist, lMotor, rMotor);
             run = 0;
         }
         if (fDist <= 100) {
-            printf("Front <= 10, Stopping");
+            printf("Front <= 10, Stopping. \n");
             stopCar();
             return;
         } else {
             currDiff = difference(lDist, rDist);
-            delay (100);
+            delay (200);
             lastDiff = currDiff;
-            currDiff = getDiff();
-            smaller = getSmaller(getDistance('l'), getDistance('r'));
-            if (currDiff - lastDiff >= 0.05) {
-                
+            lDist = getDistance('l');
+            rDist = getDistance('r');
+            currDiff = difference(lDist, rDist);
+            smaller = getSmaller(lDist, rDist);
+            if (currDiff - lastDiff >= 0.15) {
+                printf("Drifting == True. \n");
+                printf("----currDiff: %d, lastDiff: %d \n", currDiff, lastDiff);
                 int sdist = getDistance(smaller);
                 do {
                     setMotor(smaller, getMotor(smaller) + 1);
-                    setMotor(other(smaller), getMotor(other(smaller)) - 1);
-                    delay(50);
+                    printf("--Increase %c by 1 \n", smaller);
+                    //setMotor(other(smaller), getMotor(other(smaller)) - 1);
+                    delay(100);
                 }while(sdist > getDistance(smaller));
             } else if (currDiff > 0.20) {
+                printf("Uncentered == True \n");
                 smaller = getSmaller(lDist, rDist);
                 do {
                     smotor = getMotor(smaller);
@@ -378,7 +393,7 @@ void driveFoward() {
         */
     } while (lDist != 25 || rDist != 25);
     stopCar();
-    printf("Stoped because inf laser reading");
+    printf("Stoped because inf laser reading. \n");
     return;
 }
 
