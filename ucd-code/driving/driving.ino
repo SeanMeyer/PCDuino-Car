@@ -349,9 +349,9 @@ void driveFoward() {
             rDist = getDistance('r');
             currDiff = difference(lDist, rDist);
             smaller = getSmaller(lDist, rDist);
-            if (currDiff - lastDiff >= 0.15) {
+            printf("----currDiff: %d, lastDiff: %d \n", currDiff, lastDiff);
+            if (currDiff - lastDiff >= 0.10) {
                 printf("Drifting == True. \n");
-                printf("----currDiff: %d, lastDiff: %d \n", currDiff, lastDiff);
                 int sdist = getDistance(smaller);
                 do {
                     setMotor(smaller, getMotor(smaller) + 1);
