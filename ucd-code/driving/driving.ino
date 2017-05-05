@@ -18,7 +18,7 @@ const int echo = 4;
 #define speedpinA 9
 #define speedpinB 10
 
-#define speed 30
+#define speed 29
 int leftSpeed = speed;
 int rightSpeed = speed;
 int minMove = 25;
@@ -316,7 +316,7 @@ void driveFoward() {
         //Lets try to correct.
         printf("Running fixRotation\n");
         fixRotation();
-        if ( getDiff() > 0.25 ) {
+        if ( getDiff() > 0.50 ) {
             printf("Running centerCar\n");
             centerCar();
         }
@@ -330,9 +330,12 @@ void driveFoward() {
     equalPower(speed);
     printf("Go.\n");
     printf ("Left: %d Right: %d Fowrd: %d -- ML: %d MR: %d \n\n", lDist, rDist, fDist, lMotor, rMotor);
-    int diffs = [6];
-    int lDists = [6];
-    int rDists = [6]
+    double diffs[6];
+    int lDists[6];
+    int rDists[6];
+    int fDists[6];
+    bool recentAdjustment = false;
+    int sixRuns = 0;
     do {
         //Initilize variables for use
         fDist = getDistance('f');
@@ -347,8 +350,8 @@ void driveFoward() {
         fDists[run] = fDist;
 
         if (run == 5) {
-            int favg = fDists[0] + fDists[1] + fDists[2] + fDists[3] + fDists[4] fDists[5] / 6
-            if (favg <= 5) {
+            int favg = (fDists[0] + fDists[1] + fDists[2] + fDists[3] + fDists[4] + fDists[5]) / 6;
+            if (favg <= 70) {
                 printf("Front <= 10, Stopping. \n");
                 stopCar();
                 return;
@@ -356,17 +359,26 @@ void driveFoward() {
                 run = 0;
                 printf ("Left: %d Right: %d Fowrd: %d -- ML: %d MR: %d \n\n", lDist, rDist, fDist, lMotor, rMotor);
                 //If the difference is trending upwords (car is getting worse)
-                int x = diffs[0] + diffs[1] + diffs[2] / 3;
-                int y = difsf[3] + diffs[4] + diffs[5] / 3;
-                if (y - x > 0.05) {
+                double x = (diffs[0] + diffs[1] + diffs[2]) / 3;
+                double y = (diffs[3] + diffs[4] + diffs[5]) / 3;
+                printf("----Drift Amount: %f \n", (y-x));
+                if (y - x > 0.015 && !recentAdjustment) {
                     printf("--Drift Detected. %f -> %f \n", x, y);
-                    smaller = getSmaller( (lDists[4] + lDists[5] / 2), (rDists[4] + rDists[5] /2));
+                    smaller = getSmaller( ((lDists[4] + lDists[5]) / 2), ((rDists[4] + rDists[5]) /2));
                     printf("---Increase %c by 1 \n", smaller);
-                    setMotor(smaller, getMotor(smaller) + 1);
+                    setMotor(smaller, getMotor(smaller) + (50 * (y-x)));
+                    printf("~~~~increase by %f \n", (50 * (y-x)));
+                    recentAdjustment = true;
+                    sixRuns = 0;
+                } else if (recentAdjustment && sixRuns < 1) {
+                  sixRuns++;
+                } else if (recentAdjustment) {
+                  recentAdjustment = false;
+                  equalPower(speed);
                 }
             }
         run++;
-        delay(15);
+        delay(25);
     } while (lDist != 25 || rDist != 25);
     stopCar();
     printf("Stoped because inf laser reading. \n");
