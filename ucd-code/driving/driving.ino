@@ -24,6 +24,8 @@ const int echo = 4;
 int leftSpeed = speed;
 int rightSpeed = speed;
 int minMove = 25;
+int globalTurnTime = 0;
+int globalForwardTime = 0;
 
 Adafruit_VL6180X laser1;
 byte laser1SHDNPin = 1;
@@ -244,11 +246,11 @@ void performTurn(char direction) {
     switch(direction) {
       case 'L':
       case 'l':
-        rotate('r', turnTime);
+        rotate('r', globalTurnTime);
         break;
       case 'R':
       case 'r':
-        rotate('l', turnTime);
+        rotate('l', globalTurnTime);
         break;
       case 'F':
       case 'f':
@@ -256,7 +258,7 @@ void performTurn(char direction) {
     }
     delay(50);
     equalPower(speed);
-    delay(forwardTime);
+    delay(globalForwardTime);
     equalPower(0);
 }
 
@@ -423,6 +425,7 @@ void performAction(char action) {
       case 'f':
         driveFoward();
         break;
+      case 
     }
 }
 
@@ -475,7 +478,18 @@ void loop() {
     std::cout << "Enter command character (l, r, f): ";
     std::cin >> userInput;
     std::cin.clear();
-    std::cin.ignore(256, '\n' );
+    std::cin.ignore(256, '\n');
+    int turnTime, forwardTime;
+    std::cout << "Enter turn time: ";
+    std::cin >> turnTime;
+    globalTurnTime = turnTime;
+    std::cin.clear();
+    std::cin.ignore(256, '\n');
+    std::cout << "Enter forward time: ";
+    std::cin >> forwardTime;
+    globalForwardTime = forwardTime;
+    std::cin.clear();
+    std::cin.ignore(256, '\n');
     performAction(userInput);
     //driveFoward();
     //performTurn('l');
