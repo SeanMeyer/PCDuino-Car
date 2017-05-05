@@ -236,6 +236,26 @@ bool shouldRun(int lDist, int rDist) {
   }
 }
 
+void performTurn(char direction) {
+    switch(direction) {
+      case 'L':
+      case 'l':
+        rotate('r', 200);
+        break;
+      case 'R':
+      case 'r':
+        rotate('l', 200);
+        break;
+      case 'F':
+      case 'f':
+       break;
+    }
+    delay(50);
+    equalPower(speed);
+    delay(200);
+    equalPower(0);
+}
+
 void fixRotation() {
     int lDist = getDistance('l');
     int rDist = getDistance('r');
@@ -433,7 +453,8 @@ void loop() {
     int rDist = getDistance('r');
     printf("Left: %d   Right: %d\n", lDist, rDist);
     //this while is loop
-    driveFoward();
+    //driveFoward();
+    performTurn('l');
     while(1) {
       delay(5000);
         //Stop doing stuff
