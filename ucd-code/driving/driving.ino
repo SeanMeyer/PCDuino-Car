@@ -169,17 +169,29 @@ int getUltraDistance(void)
   return mm;
 }
 
+
 int getDistance(char laser)
 {
   int mm;
+  int reading[3];
   switch(laser) {
     case 'L':
     case 'l':
-      return laser2.readRange() / 10;
+      reading[0] = laser2.readRange();
+      delay(5);
+      reading[1] = laser2.readRange();
+      delay(5);
+      reading[2] = laser2.readRange();
+      return ( (reading[0] + reading[1] + reading[2]) / 3) / 10;
       break;
     case 'R':
     case 'r':
-      return laser1.readRange() / 10;
+      reading[0] = laser1.readRange();
+      delay(5);
+      reading[1] = laser1.readRange();
+      delay(5);
+      reading[2] = laser1.readRange();
+      return ( (reading[0] + reading[1] + reading[2]) / 3) / 10;
       break;
     case 'F':
     case 'f':
@@ -342,10 +354,12 @@ void driveFoward() {
         //Lets try to correct.
         printf("Running fixRotation\n");
         fixRotation();
+        /* centerCar() is untested. Don't run it ever.'
         if ( getDiff() > 0.50 ) {
             printf("Running centerCar\n");
             centerCar();
         }
+        */
     }
 
 
@@ -356,12 +370,14 @@ void driveFoward() {
     equalPower(speed);
     printf("Go.\n");
     printf ("Left: %d Right: %d Fowrd: %d -- ML: %d MR: %d \n\n", lDist, rDist, fDist, lMotor, rMotor);
-    double diffs[6];
-    int lDists[6];
-    int rDists[6];
-    int fDists[6];
+    int avgRuns = 6;
+    double diffs[avgRuns];  //Save the difference each run
+    int lDists[avgRuns];    //Save lDist every run
+    int rDists[avgRuns];    //..
+    int fDists[avgRuns];    //..
     bool recentAdjustment = false;
-    int sixRuns = 0;
+    int numAvgRuns = 0;
+    int adjustmentMagic[2] = {20, 50};  //Multiply difference by, 2 for difference differences
     do {
         //Initilize variables for use
         fDist = getDistance('f');
@@ -376,35 +392,59 @@ void driveFoward() {
         fDists[run] = fDist;
 
         if (run == 5) {
-            int favg = (fDists[0] + fDists[1] + fDists[2] + fDists[3] + fDists[4] + fDists[5]) / 6;
-            if (favg <= 70) {
+            int i;        //use for for loops
+            
+            //Get an average of the front readings
+            int favg = 0; //front reading averaged.
+            for (i = 0; i < avgRuns; i++) {
+                favg = favg + fDists[i];
+            }
+            favg = favg / avgRuns;
+            if (favg <= 70) {   //if the front readings are low, stop
                 printf("Front <= 10, Stopping. \n");
                 stopCar();
                 return;
-            } else
+            } else              //Nothing in front, lets go.
                 run = 0;
                 printf ("Left: %d Right: %d Fowrd: %d -- ML: %d MR: %d \n\n", lDist, rDist, fDist, lMotor, rMotor);
                 //If the difference is trending upwords (car is getting worse)
-                double x = (diffs[0] + diffs[1] + diffs[2]) / 3;
-                double y = (diffs[3] + diffs[4] + diffs[5]) / 3;
+                double x = 0;   //Average of the first 1/2 of the differences
+                double y = 0;   //Average of the 2nd 1/2 of the differences
+                for (i = 0; i < avgRuns / 2; i++) {
+                    x = x + diffs[i];
+                }
+                for (i = avgRuns / 2; i < avgRuns; i++) {
+                    y = y + diffs[i];
+                }
+                double x = x / (avgRuns / 2);
+                double y = y / (avgRuns / 2);
                 printf("----Drift Amount: %f \n", (y-x));
-                if (y - x > 0.015 && !recentAdjustment) {
-                    printf("--Drift Detected. %f -> %f \n", x, y);
-                    smaller = getSmaller( ((lDists[4] + lDists[5]) / 2), ((rDists[4] + rDists[5]) /2));
-                    printf("---Increase %c by 1 \n", smaller);
-                    setMotor(smaller, getMotor(smaller) + (50 * (y-x)));
-                    printf("~~~~increase by %f \n", (50 * (y-x)));
+                if (y > 0.80) {          //If the lasers are very off, run fixrotate
+                    printf("Difference in y > 0.5, is %f \n -----Run fixrotate \n", y);
+                    equalPower(0);
+                    fixRotation();
+                    run = 0;
+                    recentAdjustment = false;
+                    equalPower(speed);
+                } else if (y - x > 0.015 && !recentAdjustment) {
+                    printf("--Fixing Drift %f -> %f \n", x, y);
+                    smaller = getSmaller( ((lDists[(avgRuns - 2)] + lDists[(avgRuns - 1)]) / 2), ((rDists[(avgRuns - 2)] + rDists[(avgRuns - 1)]) /2));
+                    printf("---Increase %c by %d \n", smaller, (int) (20 * y));
+                    if (y - x > 0.25)
+                        setMotor(smaller, getMotor(smaller) + ceil(adjustmentMagic[0] * y));
+                    else
+                        setMotor(smaller, getMotor(smaller) + ceil(adjustmentMagic[1] * y));
                     recentAdjustment = true;
                     sixRuns = 0;
-                } else if (recentAdjustment && sixRuns < 1) {
-                  sixRuns++;
+                } else if (recentAdjustment && numAvgRuns < 1) {
+                  numAvgRuns++;
                 } else if (recentAdjustment) {
                   recentAdjustment = false;
                   equalPower(speed);
                 }
             }
         run++;
-        delay(25);
+        delay(40);
     } while (lDist != 25 || rDist != 25);
     stopCar();
     printf("Stoped because inf laser reading. \n");
