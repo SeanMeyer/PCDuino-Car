@@ -391,7 +391,7 @@ void driveFoward() {
         rDists[run] = rDist;
         fDists[run] = fDist;
 
-        if (run == 5) {
+        if (run == avgRuns - 1) {
             int i;        //use for for loops
             
             //Get an average of the front readings
@@ -401,12 +401,12 @@ void driveFoward() {
             }
             favg = favg / avgRuns;
             if (favg <= 70) {   //if the front readings are low, stop
-                printf("Front <= 10, Stopping. \n");
+                printf("Front <= 70, Stopping. its &d \n", favg);
                 stopCar();
                 return;
-            } else              //Nothing in front, lets go.
+            } else {             //Nothing in front, lets go.
                 run = 0;
-                printf ("Left: %d Right: %d Fowrd: %d -- ML: %d MR: %d \n\n", lDist, rDist, fDist, lMotor, rMotor);
+                printf ("Left: %d Right: %d Fowrd: %d -- ML: %d MR: %d \n\n", lDist, rDist, favg, lMotor, rMotor);
                 //If the difference is trending upwords (car is getting worse)
                 double x = 0;   //Average of the first 1/2 of the differences
                 double y = 0;   //Average of the 2nd 1/2 of the differences
@@ -418,7 +418,7 @@ void driveFoward() {
                 }
                 x = x / (avgRuns / 2);
                 y = y / (avgRuns / 2);
-                printf("----Drift Amount: %f \n", (y-x));
+                printf("----Drift Amount: %f \n", (y - x));
                 if (lDists[avgRuns-1] < 4 || rDists[avgRuns-1] < 4) {          //If the lasers are very off, run fixrotate
                     printf("One of the lasers is to small -----Run fixrotate \n");
                     equalPower(0);
@@ -448,8 +448,9 @@ void driveFoward() {
                   equalPower(speed);
                 }
             }
+        }
         run++;
-        delay(40);
+        delay(2);
     } while (lDist != 25 || rDist != 25);
     stopCar();
     printf("Stoped because inf laser reading. \n");
