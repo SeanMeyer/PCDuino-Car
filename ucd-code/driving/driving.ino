@@ -237,14 +237,16 @@ bool shouldRun(int lDist, int rDist) {
 }
 
 void performTurn(char direction) {
+    int turnTime = 1000;
+    int forwardTime = 1000;
     switch(direction) {
       case 'L':
       case 'l':
-        rotate('r', 200);
+        rotate('r', turnTime);
         break;
       case 'R':
       case 'r':
-        rotate('l', 200);
+        rotate('l', turnTime);
         break;
       case 'F':
       case 'f':
@@ -252,7 +254,7 @@ void performTurn(char direction) {
     }
     delay(50);
     equalPower(speed);
-    delay(200);
+    delay(forwardTime);
     equalPower(0);
 }
 
