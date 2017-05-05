@@ -7,6 +7,8 @@ extern "C" {
 #include "Adafruit_VL6180X.h"
 #include <core.h>
 #include <math.h>
+#include <iostream>
+#include <string>
 
 const int trig = 3;
 const int echo = 4;
@@ -407,6 +409,23 @@ void driveFoward() {
     return;
 }
 
+void performAction(char action) {
+    switch(action) {
+      case 'L':
+      case 'l':
+        performTurn('l');
+        break;
+      case 'R':
+      case 'r':
+        performTurn('r');
+        break;
+      case 'F':
+      case 'f':
+        driveFoward();
+        break;
+    }
+}
+
 void setup() {
   printf("starting");
 
@@ -451,14 +470,13 @@ void setup() {
 
 void loop() {
     stopCar();
-    int lDist = getDistance('l');
-    int rDist = getDistance('r');
-    printf("Left: %d   Right: %d\n", lDist, rDist);
     //this while is loop
+    char userInput;
+    std::cout << "Enter command character (l, r, f): ";
+    std::cin >> userInput;
+    std::cin.clear();
+    std::cin.ignore(256, '\n' );
+    performAction(userInput);
     //driveFoward();
-    performTurn('l');
-    while(1) {
-      delay(5000);
-        //Stop doing stuff
-    }
+    //performTurn('l');
 }
