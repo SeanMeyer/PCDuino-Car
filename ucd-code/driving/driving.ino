@@ -182,7 +182,7 @@ int getDistance(char laser)
       reading[1] = laser2.readRange();
       delay(5);
       reading[2] = laser2.readRange();
-      return ( (reading[0] + reading[1] + reading[2]) / 3) / 10;
+      return ( round(reading[0] + reading[1] + reading[2]) / 3) / 10;
       break;
     case 'R':
     case 'r':
@@ -191,7 +191,7 @@ int getDistance(char laser)
       reading[1] = laser1.readRange();
       delay(5);
       reading[2] = laser1.readRange();
-      return ( (reading[0] + reading[1] + reading[2]) / 3) / 10;
+      return ( round(reading[0] + reading[1] + reading[2]) / 3) / 10;
       break;
     case 'F':
     case 'f':
@@ -321,16 +321,16 @@ void centerCar() {
     currDiff = difference(lDist, rDist);
     if (currDiff > 0.30) {
       printf("      Car needs to be centered.\n");
-      do {
+      //do {
           setMotor(smaller, round(minMove * 1.25));
           setMotor(other(smaller), minMove);
-          delay(200);
+          delay(500);
           setMotor(smaller, minMove);
           setMotor(other(smaller), round(minMove * 1.25));
-          delay(100);
+          delay(300);
           lastDiff = currDiff;
           currDiff = getDiff();
-      } while (lastDiff > currDiff);
+      //} while (lastDiff > currDiff);
       printf("      Done centering car.\n");
       equalPower(0);
     }
@@ -350,7 +350,7 @@ void driveFoward() {
 
     //Initial Call
     //  Do things if (and only if) the car is not centered/straight
-    if ( currDiff >= 0.15 || lDist > 20 || rDist > 20) {
+    if ( currDiff >= 0.30 || lDist > 20 || rDist > 20) {
         //Lets try to correct.
         printf("Running fixRotation\n");
         fixRotation();
@@ -400,9 +400,9 @@ void driveFoward() {
             for (i = 0; i < avgRuns; i++) {
                 favg = favg + fDists[i];
             }
-            favg = favg / avgRuns;
-            if (favg <= 70) {   //if the front readings are low, stop
-                printf("Front <= 70, Stopping. its &d \n", favg);
+            favg = round(favg / avgRuns);
+            if (favg <= 20) {   //if the front readings are low, stop
+                printf("Front <= 20, Stopping. its %d \n", favg);
                 stopCar();
                 return;
             } else {             //Nothing in front, lets go.
@@ -431,6 +431,10 @@ void driveFoward() {
                     fixRotation();
                     run = 0;
                     recentAdjustment = false;
+                    if (lDists[avgRuns-1] < 5 || rDists[avgRuns-1] < 5) {
+                      printf("Rotate didn't fix things... Center car? \n");
+                      centerCar();
+                    }
                     equalPower(speed);
                 } else if (y - x > 0.015 && !recentAdjustment && ( (y - x) > lastDriftAmount)) {
                     printf("--Fixing Drift %f -> %f \n", x, y);
@@ -442,14 +446,27 @@ void driveFoward() {
                         setMotor(smaller, getMotor(smaller) + ceil(adjustmentMagic[0] * y));
                     recentAdjustment = true;
                     numAvgRuns = 0;
-                } else if (recentAdjustment && numAvgRuns < 1) {
+                } else if (recentAdjustment) { //&& numAvgRuns < 1) {
+                  if (y < 0.15 || (y-x) > lastDriftAmount) {
+                    printf("UNDO ADJUSTMENT. \n");
+                    recentAdjustment = false;
+                    equalPower(speed);
+                  } else {
+                    printf("ADJUSTMENT NOT WORKING. \n");
+                    equalPower(0);
+                    delay(20);
+                    fixRotation();
+                    delay(20);
+                    recentAdjustment = false;
+                    equalPower(speed);
+                  }
                   numAvgRuns++;
+                  //recentAdjustment = false;
+                  //equalPower(speed);
+                } /*else if (recentAdjustment) {
                   recentAdjustment = false;
                   equalPower(speed);
-                } else if (recentAdjustment) {
-                  recentAdjustment = false;
-                  equalPower(speed);
-                }
+                }*/
                 lastDriftAmount = y - x;
             }
         }
