@@ -425,7 +425,6 @@ void performAction(char action) {
       case 'f':
         driveFoward();
         break;
-      case 
     }
 }
 
