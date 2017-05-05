@@ -321,16 +321,16 @@ void centerCar() {
     currDiff = difference(lDist, rDist);
     if (currDiff > 0.30) {
       printf("      Car needs to be centered.\n");
-      do {
+      //do {
           setMotor(smaller, round(minMove * 1.25));
           setMotor(other(smaller), minMove);
-          delay(200);
+          delay(500);
           setMotor(smaller, minMove);
           setMotor(other(smaller), round(minMove * 1.25));
-          delay(100);
+          delay(300);
           lastDiff = currDiff;
           currDiff = getDiff();
-      } while (lastDiff > currDiff);
+      //} while (lastDiff > currDiff);
       printf("      Done centering car.\n");
       equalPower(0);
     }
@@ -431,6 +431,10 @@ void driveFoward() {
                     fixRotation();
                     run = 0;
                     recentAdjustment = false;
+                    if (lDists[avgRuns-1] < 5 || rDists[avgRuns-1] < 5) {
+                      printf("Rotate didn't fix things... Center car? \n");
+                      centerCar();
+                    }
                     equalPower(speed);
                 } else if (y - x > 0.015 && !recentAdjustment && ( (y - x) > lastDriftAmount)) {
                     printf("--Fixing Drift %f -> %f \n", x, y);
