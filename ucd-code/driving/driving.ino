@@ -23,7 +23,7 @@ const int echo = 4;
 #define speed 29
 int leftSpeed = speed;
 int rightSpeed = speed;
-int minMove = 25;
+int minMove = 27;
 int globalTurnTime = 0;
 int globalForwardTime = 0;
 
@@ -253,7 +253,7 @@ bool shouldRun(int lDist, int rDist) {
 }
 
 void performTurn(char direction) {
-    int turnTime = 1000;
+    int turnTime = 1200;
     int forwardTime = 1000;
     switch(direction) {
       case 'L':
@@ -295,9 +295,9 @@ void fixRotation() {
         printf("         %cDist: %d, last-%cDist: %d, fDist: %d\n", smaller, smallerDist, smaller, lastSmallerDist, fDist);
     } while (smallerDist <= lastSmallerDist || fDist < 10);
     equalPower(0);
-    delay(100);
-    rotate(other(smaller), rotationDelay * 2);
-    equalPower(0);
+    delay(20);
+    //rotate(other(smaller), rotationDelay * 2);
+    //equalPower(0);
     /*
     lastSmallerDist = smallerDist;
     printf("Entering second while\n");
@@ -370,14 +370,15 @@ void driveFoward() {
     equalPower(speed);
     printf("Go.\n");
     printf ("Left: %d Right: %d Fowrd: %d -- ML: %d MR: %d \n\n", lDist, rDist, fDist, lMotor, rMotor);
-    int avgRuns = 6;
+    int avgRuns = 4;
     double diffs[avgRuns];  //Save the difference each run
     int lDists[avgRuns];    //Save lDist every run
     int rDists[avgRuns];    //..
     int fDists[avgRuns];    //..
     bool recentAdjustment = false;
     int numAvgRuns = 0;
-    int adjustmentMagic[2] = {20, 50};  //Multiply difference by, 2 for difference differences
+    int adjustmentMagic[2] = {10, 50};  //Multiply difference by, 2 for difference differences
+    double lastDriftAmount = 0;
     do {
         //Initilize variables for use
         fDist = getDistance('f');
@@ -406,7 +407,7 @@ void driveFoward() {
                 return;
             } else {             //Nothing in front, lets go.
                 run = 0;
-                printf ("Left: %d Right: %d Fowrd: %d -- ML: %d MR: %d \n\n", lDist, rDist, favg, lMotor, rMotor);
+                printf ("\n Left: %d Right: %d Fowrd: %d -- ML: %d MR: %d \n", lDist, rDist, favg, lMotor, rMotor);
                 //If the difference is trending upwords (car is getting worse)
                 double x = 0;   //Average of the first 1/2 of the differences
                 double y = 0;   //Average of the 2nd 1/2 of the differences
@@ -419,23 +420,23 @@ void driveFoward() {
                 x = x / (avgRuns / 2);
                 y = y / (avgRuns / 2);
                 printf("----Drift Amount: %f \n", (y - x));
-                if (lDists[avgRuns-1] < 4 || rDists[avgRuns-1] < 4) {          //If the lasers are very off, run fixrotate
+                if (lDists[avgRuns-1] < 5 || rDists[avgRuns-1] < 5) {          //If the lasers are very off, run fixrotate
                     printf("One of the lasers is to small -----Run fixrotate \n");
                     equalPower(0);
                     delay(20);
                     equalPower(-speed);
-                    delay(200);
+                    delay(350);
                     equalPower(0);
                     delay(20);
                     fixRotation();
                     run = 0;
                     recentAdjustment = false;
                     equalPower(speed);
-                } else if (y - x > 0.015 && !recentAdjustment) {
+                } else if (y - x > 0.015 && !recentAdjustment && ( (y - x) > lastDriftAmount)) {
                     printf("--Fixing Drift %f -> %f \n", x, y);
                     smaller = getSmaller( ((lDists[(avgRuns - 2)] + lDists[(avgRuns - 1)]) / 2), ((rDists[(avgRuns - 2)] + rDists[(avgRuns - 1)]) /2));
-                    printf("---Increase %c by %d \n", smaller, (int) (20 * y));
-                    if (y - x > 0.25)
+                    printf("---Increase %c by %d \n", smaller, (int) (adjustmentMagic[0] * y));
+                    if (y - x > 0.300)
                         setMotor(smaller, getMotor(smaller) + ceil(adjustmentMagic[1] * y));
                     else
                         setMotor(smaller, getMotor(smaller) + ceil(adjustmentMagic[0] * y));
@@ -443,10 +444,13 @@ void driveFoward() {
                     numAvgRuns = 0;
                 } else if (recentAdjustment && numAvgRuns < 1) {
                   numAvgRuns++;
+                  recentAdjustment = false;
+                  equalPower(speed);
                 } else if (recentAdjustment) {
                   recentAdjustment = false;
                   equalPower(speed);
                 }
+                lastDriftAmount = y - x;
             }
         }
         run++;
