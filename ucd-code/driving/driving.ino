@@ -258,11 +258,11 @@ void performTurn(char direction) {
     switch(direction) {
       case 'L':
       case 'l':
-        rotate('r', globalTurnTime);
+        rotate('r', turnTime);
         break;
       case 'R':
       case 'r':
-        rotate('l', globalTurnTime);
+        rotate('l', turnTime);
         break;
       case 'F':
       case 'f':
@@ -270,7 +270,7 @@ void performTurn(char direction) {
     }
     delay(50);
     equalPower(speed);
-    delay(globalForwardTime);
+    delay(forwardTime);
     equalPower(0);
 }
 
@@ -528,6 +528,7 @@ void loop() {
     std::cin >> userInput;
     std::cin.clear();
     std::cin.ignore(256, '\n');
+    /*
     int turnTime, forwardTime;
     std::cout << "Enter turn time: ";
     std::cin >> turnTime;
@@ -539,6 +540,7 @@ void loop() {
     globalForwardTime = forwardTime;
     std::cin.clear();
     std::cin.ignore(256, '\n');
+    */
     performAction(userInput);
     //driveFoward();
     //performTurn('l');
