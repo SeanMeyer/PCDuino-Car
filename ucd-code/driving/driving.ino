@@ -419,9 +419,14 @@ void driveFoward() {
                 x = x / (avgRuns / 2);
                 y = y / (avgRuns / 2);
                 printf("----Drift Amount: %f \n", (y-x));
-                if (y > 0.80) {          //If the lasers are very off, run fixrotate
-                    printf("Difference in y > 0.5, is %f \n -----Run fixrotate \n", y);
+                if (lDists[avgRuns-1] < 4 || rDists[avgRuns-1] < 4) {          //If the lasers are very off, run fixrotate
+                    printf("One of the lasers is to small -----Run fixrotate \n");
                     equalPower(0);
+                    delay(20);
+                    equalPower(-speed);
+                    delay(200);
+                    equalPower(0);
+                    delay(20);
                     fixRotation();
                     run = 0;
                     recentAdjustment = false;
@@ -431,9 +436,9 @@ void driveFoward() {
                     smaller = getSmaller( ((lDists[(avgRuns - 2)] + lDists[(avgRuns - 1)]) / 2), ((rDists[(avgRuns - 2)] + rDists[(avgRuns - 1)]) /2));
                     printf("---Increase %c by %d \n", smaller, (int) (20 * y));
                     if (y - x > 0.25)
-                        setMotor(smaller, getMotor(smaller) + ceil(adjustmentMagic[0] * y));
-                    else
                         setMotor(smaller, getMotor(smaller) + ceil(adjustmentMagic[1] * y));
+                    else
+                        setMotor(smaller, getMotor(smaller) + ceil(adjustmentMagic[0] * y));
                     recentAdjustment = true;
                     numAvgRuns = 0;
                 } else if (recentAdjustment && numAvgRuns < 1) {
