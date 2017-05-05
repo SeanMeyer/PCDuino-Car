@@ -20,7 +20,7 @@ const int echo = 4;
 #define speedpinA 9
 #define speedpinB 10
 
-#define speed 29
+int speed = 29;
 int leftSpeed = speed;
 int rightSpeed = speed;
 int minMove = 27;
@@ -518,11 +518,21 @@ void setup() {
   delay(50);
   laser2.begin(0x86);
   delay(50);
+  stopCar();
+  //start by setting minspeed and speed
+  std::cout << "Enter minMove (27): ";
+  std::cin >> minMove;
+  std::cin.clear();
+  std::cin.ignore(256, '\n');
+  std::cout << "Enter speed (29): ";
+  std::cin >> speed;
+  std::cin.clear();
+  std::cin.ignore(256, '\n');
 }
 
 void loop() {
     stopCar();
-    //this while is loop
+
     char userInput;
     std::cout << "Enter command character (l, r, f): ";
     std::cin >> userInput;
