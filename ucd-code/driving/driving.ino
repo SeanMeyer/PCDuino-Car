@@ -471,6 +471,7 @@ void driveFoward() {
                 driftChange = abs( (y-x) - lastDriftAmount); 
                 lastDriftAmount = y - x;
             }
+            run = 0;
         }
         run++;
         delay(2);
