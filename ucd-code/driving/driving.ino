@@ -434,7 +434,7 @@ void driveFoward() {
                     recentAdjustment = false;
                     if (getDistance('l') < 5 || getDistance('r') < 5) {
                       printf("Rotate didn't fix things... Center car? \n");
-                      centerCar();
+                      //centerCar();
                     }
                     equalPower(speed);
                 } else if (y - x > 0.015 && !recentAdjustment && ( (y - x) > lastDriftAmount)) {
@@ -475,7 +475,7 @@ void driveFoward() {
         }
         run++;
         delay(2);
-    } while (lDist != 25 || rDist != 25);
+    } while (lDist != 25 && rDist != 25);
     stopCar();
     printf("Stoped because inf laser reading. \n");
     return;
