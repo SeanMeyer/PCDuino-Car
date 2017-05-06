@@ -253,7 +253,7 @@ bool shouldRun(int lDist, int rDist) {
 }
 
 void performTurn(char direction) {
-    int turnTime = 1200;
+    int turnTime = 1000;
     int forwardTime = 1000;
     switch(direction) {
       case 'L':
@@ -448,7 +448,7 @@ void driveFoward() {
                     recentAdjustment = true;
                     numAvgRuns = 0;
                 } else if (recentAdjustment) { //&& numAvgRuns < 1) {
-                  if (y < 0.15 || (y-x) > lastDriftAmount) {
+                  if (y < 0.15 || (y-x) > (lastDriftAmount + .1)) {
                     printf("UNDO ADJUSTMENT. \n");
                     recentAdjustment = false;
                     equalPower(speed);
@@ -471,7 +471,7 @@ void driveFoward() {
                 driftChange = abs( (y-x) - lastDriftAmount); 
                 lastDriftAmount = y - x;
             }
-            run = 0;
+            run = -1;
         }
         run++;
         delay(2);
