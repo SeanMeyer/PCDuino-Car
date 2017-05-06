@@ -379,6 +379,7 @@ void driveFoward() {
     int numAvgRuns = 0;
     int adjustmentMagic[2] = {10, 50};  //Multiply difference by, 2 for difference differences
     double lastDriftAmount = 0;
+    double driftChange = 0;
     do {
         //Initilize variables for use
         fDist = getDistance('f');
@@ -431,7 +432,7 @@ void driveFoward() {
                     fixRotation();
                     run = 0;
                     recentAdjustment = false;
-                    if (lDists[avgRuns-1] < 5 || rDists[avgRuns-1] < 5) {
+                    if (getDistance('l') < 5 || getDistance('r') < 5) {
                       printf("Rotate didn't fix things... Center car? \n");
                       centerCar();
                     }
@@ -439,11 +440,11 @@ void driveFoward() {
                 } else if (y - x > 0.015 && !recentAdjustment && ( (y - x) > lastDriftAmount)) {
                     printf("--Fixing Drift %f -> %f \n", x, y);
                     smaller = getSmaller( ((lDists[(avgRuns - 2)] + lDists[(avgRuns - 1)]) / 2), ((rDists[(avgRuns - 2)] + rDists[(avgRuns - 1)]) /2));
-                    printf("---Increase %c by %d \n", smaller, (int) (adjustmentMagic[0] * y));
+                    printf("---Increase %c by %d \n", smaller, (int) ceil(adjustmentMagic[0] * y));
                     if (y - x > 0.300)
                         setMotor(smaller, getMotor(smaller) + ceil(adjustmentMagic[1] * y));
                     else
-                        setMotor(smaller, getMotor(smaller) + ceil(adjustmentMagic[0] * y));
+                        setMotor(smaller, getMotor(smaller) + 2);
                     recentAdjustment = true;
                     numAvgRuns = 0;
                 } else if (recentAdjustment) { //&& numAvgRuns < 1) {
@@ -451,7 +452,7 @@ void driveFoward() {
                     printf("UNDO ADJUSTMENT. \n");
                     recentAdjustment = false;
                     equalPower(speed);
-                  } else {
+                  } else if (abs( (y-x) - lastDriftAmount) > driftChange) {
                     printf("ADJUSTMENT NOT WORKING. \n");
                     equalPower(0);
                     delay(20);
@@ -467,6 +468,7 @@ void driveFoward() {
                   recentAdjustment = false;
                   equalPower(speed);
                 }*/
+                driftChange = abs( (y-x) - lastDriftAmount); 
                 lastDriftAmount = y - x;
             }
         }
