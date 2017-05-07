@@ -32,15 +32,19 @@ class BreadthSearch:
                 if tree.data.connectedTo[i].id not in queue2:
                     if i == 0:
                         node = Tree(tree.data.connectedTo[i], "up", tree)
+                        tree.add_child(node)
                         queue.put(node)
                     elif i == 1:
                         node = Tree(tree.data.connectedTo[i], "right", tree)
+                        tree.add_child(node)
                         queue.put(node)
                     elif i == 2:
                         node = Tree(tree.data.connectedTo[i], "down", tree)
+                        tree.add_child(node)
                         queue.put(node)
                     elif i == 3:
                         node = Tree(tree.data.connectedTo[i], "left", tree)
+                        tree.add_child(node)
                         queue.put(node)
 
     def is_goal(self, goal):
@@ -52,11 +56,12 @@ class BreadthSearch:
     def make_path(self, tree):
         p = []
         while tree.parent is not None:
-            p.append(tree.data.id)
+            p.append(tree)
             tree = tree.parent
-        p.append(tree.data.id)
+        p.append(tree)
         path = list(reversed(p))
         return path
+
 
     def search(self):
         tree = Tree(self.current_node, "null", None)
@@ -72,17 +77,5 @@ class BreadthSearch:
                 path = self.make_path(tree)
                 break
             self.get_neighbors(tree, opened, closed)
-        print path
-
-def main(argv):
-    amap = adjacency_list.make_map()
-    bs = BreadthSearch(amap, amap.get_node('A1'))
-    bs.search()
-    pass
-
-
-if __name__ == '__main__':
-    main(sys.argv)
-
-
+        return path
 
