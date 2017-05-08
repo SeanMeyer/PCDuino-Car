@@ -42,7 +42,7 @@ def main(argv):
     direct = get_direction(path)
     for move in direct:
         print move
-        input()
+        raw_input()
 
 
 if __name__ == '__main__':
