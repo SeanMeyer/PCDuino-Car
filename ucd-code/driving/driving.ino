@@ -20,6 +20,9 @@ const int echo = 4;
 #define speedpinA 9
 #define speedpinB 10
 
+char fromPython[100];
+
+
 int speed = 29;
 int leftSpeed = speed;
 int rightSpeed = speed;
@@ -548,6 +551,15 @@ void setup() {
   std::cin >> speed;
   std::cin.clear();
   std::cin.ignore(256, '\n');
+
+
+  //This is for getting output from python
+  FILE *p = popen("python driver.py", "r");
+  if (p != NULL) {
+      while(fgets(output, sizeof(fromPython), p) != NULL) {
+          printf("From Python: %s \n", fromPython);
+      }
+  }
 }
 
 void loop() {
@@ -574,4 +586,12 @@ void loop() {
     performAction(userInput);
     //driveFoward();
     //performTurn('l');
+
+
+    char * pch;
+    pch = strtok(fromPython, ",");
+    while (pch != NULL) {
+      printf("Doing: %s from python.", pch);
+      performAction(pch)
+    }
 }

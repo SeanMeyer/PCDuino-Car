@@ -40,9 +40,10 @@ def main(argv):
     bs = map_search.BreadthSearch(amap, amap.get_node('A1'))
     path = bs.search()
     direct = get_direction(path)
+    totalpath = ""
     for move in direct:
-        print move
-        raw_input()
+        totalpath = totalpath + move + ","
+    print totalpath[:-1]
 
 
 if __name__ == '__main__':
