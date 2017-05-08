@@ -21,7 +21,7 @@ const int echo = 4;
 #define speedpinB 10
 
 char fromPython[100];
-char directions[] = {'l','f','f','r', 'f','f', 'l','f','r','f'};
+char directions[] = {'l','f','f','f','r', 'f','f', 'l','f','r','f', 'f', 'l', 'r', 'f'};
 
 
 int speed = 29;
@@ -275,8 +275,8 @@ bool shouldRun(int lDist, int rDist) {
 }
 
 void performTurn(char direction) {
-    int turnTime = 600;
-    int forwardTime = 1200;
+    int turnTime = 575;
+    int forwardTime = 800;
     switch(direction) {
       case 'L':
       case 'l':
@@ -320,10 +320,11 @@ void fixRotation() {
     } while ((smallerDist <= lastSmallerDist || fDist < 5) && count < 45);
     equalPower(0);
     delay(20);
-    if (getDistance('l') == 25 && getDistance('r') == 25) {
+    if (getDistance('l') == 25 || getDistance('r') == 25) {
       printf("infinite rotate distance, moving forwards a bit\n");
       equalPower(speed);
-      delay(200);
+      delay(250);
+      fixRotation();
     }
     //rotate(other(smaller), rotationDelay * 2);
     //equalPower(0);
@@ -626,10 +627,17 @@ void loop() {
     }
     */
     int dirLength = sizeof(directions) / sizeof(directions[0]);
+    int leftsDoneCount = 0;
     for(int i = 0; i < dirLength; i++) {
       printf("Next will be %c \n", directions[i]);
-      std::cin >> userInput;
-      performAction(directions[i]);
+      //std::cin >> userInput;
+      delay(50);
+      if (getDistance('l') == 25 && leftsDoneCount < 3) {
+        performAction('l');
+        leftsDoneCount = leftsDoneCount + 1;
+      } else {
+        performAction('f');
+      }
       delay(200);
     }
 }
