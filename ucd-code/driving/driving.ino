@@ -21,6 +21,7 @@ const int echo = 4;
 #define speedpinB 10
 
 char fromPython[100];
+char directions
 
 
 int speed = 29;
@@ -560,6 +561,7 @@ void setup() {
           printf("From Python: %s \n", fromPython);
       }
   }
+  char directions[] = {'f','f','f','f','l','f','r','f'};
 }
 
 void loop() {
@@ -583,15 +585,21 @@ void loop() {
     std::cin.clear();
     std::cin.ignore(256, '\n');
     */
-    performAction(userInput);
+    //performAction(userInput);
     //driveFoward();
     //performTurn('l');
 
 
+    /*
     char * pch;
     pch = strtok(fromPython, ",");
     while (pch != NULL) {
       printf("Doing: %s from python.", pch);
       performAction(*pch);
+    }
+    */
+    for(int i = 0; i < length(directions); i++) {
+      performAction(directions[i]);
+      delay(200);
     }
 }
