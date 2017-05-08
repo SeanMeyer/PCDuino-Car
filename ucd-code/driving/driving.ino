@@ -21,7 +21,7 @@ const int echo = 4;
 #define speedpinB 10
 
 char fromPython[100];
-char directions
+char directions[] = {'f','f','f','f','l','f','r','f'};
 
 
 int speed = 29;
@@ -561,7 +561,6 @@ void setup() {
           printf("From Python: %s \n", fromPython);
       }
   }
-  char directions[] = {'f','f','f','f','l','f','r','f'};
 }
 
 void loop() {
