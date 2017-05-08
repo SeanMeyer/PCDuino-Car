@@ -202,6 +202,24 @@ int getDistance(char laser)
       return getUltraDistance();
   }
 }
+int getDistance2(char laser)
+{
+  int mm;
+  switch(laser) {
+    case 'L':
+    case 'l':
+      return (round(laser2.readRange() / 10));
+      break;
+    case 'R':
+    case 'r':
+      return ( round(laser1.readRange() / 10));
+      break;
+    case 'F':
+    case 'f':
+      return getUltraDistance();
+  }
+  return 0;
+}
 
 double difference(int left, int right) {
     double total = left + right;
@@ -441,14 +459,14 @@ void driveFoward() {
                       //centerCar();
                     }
                     equalPower(speed);
-                } else if (y - x > 0.015 && !recentAdjustment && ( (y - x) > lastDriftAmount)) {
+                } else if (y - x > 0.03 && !recentAdjustment && ( (y - x) > lastDriftAmount)) {
                     printf("--Fixing Drift %f -> %f \n", x, y);
                     smaller = getSmaller( ((lDists[(avgRuns - 2)] + lDists[(avgRuns - 1)]) / 2), ((rDists[(avgRuns - 2)] + rDists[(avgRuns - 1)]) /2));
                     printf("---Increase %c by %d \n", smaller, (int) ceil(adjustmentMagic[0] * y));
                     if (y - x > 0.300)
                         setMotor(smaller, getMotor(smaller) + ceil(adjustmentMagic[1] * y));
                     else
-                        setMotor(smaller, getMotor(smaller) + 2);
+                        setMotor(smaller, getMotor(smaller) + 3);
                     recentAdjustment = true;
                     numAvgRuns = 0;
                 } else if (recentAdjustment) { //&& numAvgRuns < 1) {
@@ -497,6 +515,8 @@ void performAction(char action) {
         break;
       case 'F':
       case 'f':
+        performTurn('f');
+        delay(25);
         driveFoward();
         break;
     }
@@ -597,7 +617,10 @@ void loop() {
       performAction(*pch);
     }
     */
-    for(int i = 0; i < length(directions); i++) {
+    int dirLength = sizeof(directions) / sizeof(directions[0]);
+    for(int i = 0; i < dirLength; i++) {
+      printf("Next will be %c \n", directions[i]);
+      std::cin >> userInput;
       performAction(directions[i]);
       delay(200);
     }
