@@ -68,7 +68,7 @@ class Map:
         return self.nodeList.keys()
 
     def find_inter(self):
-        with open("Embedded_Map.txt", "r") as mapp:
+        with open("/home/linaro/PCDuino-Car/MapCreation-Search code/Embedded_Map.txt", "r") as mapp:
             for line in mapp:
                 data_list = line.split(';')
                 if data_list[5] == 'inter':
@@ -82,7 +82,7 @@ class Map:
 def make_map():
     graph = Map()
     # Using the relative file path to access the adjacency map file
-    with open("Embedded_Map.txt", "r") as mapp:
+    with open("/home/linaro/PCDuino-Car/MapCreation-Search code/Embedded_Map.txt", "r") as mapp:
         for line in mapp:
             data_list = line.split(';')
             node_main = str(data_list[0])

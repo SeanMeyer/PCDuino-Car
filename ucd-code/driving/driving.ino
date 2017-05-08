@@ -554,9 +554,9 @@ void setup() {
 
 
   //This is for getting output from python
-  FILE *p = popen("python driver.py", "r");
+  FILE *p = popen("python \"/home/linaro/PCDuino-Car/MapCreation-Search code/driver.py\"", "r");
   if (p != NULL) {
-      while(fgets(output, sizeof(fromPython), p) != NULL) {
+      while(fgets(fromPython, sizeof(fromPython), p) != NULL) {
           printf("From Python: %s \n", fromPython);
       }
   }
@@ -592,6 +592,6 @@ void loop() {
     pch = strtok(fromPython, ",");
     while (pch != NULL) {
       printf("Doing: %s from python.", pch);
-      performAction(pch)
+      performAction(*pch);
     }
 }
