@@ -21,7 +21,7 @@ const int echo = 4;
 #define speedpinB 10
 
 char fromPython[100];
-char directions[] = {'f','f','f','f','l','f','r','f'};
+char directions[] = {'l','f','f','r', 'f','f', 'l','f','r','f'};
 
 
 int speed = 29;
@@ -275,8 +275,8 @@ bool shouldRun(int lDist, int rDist) {
 }
 
 void performTurn(char direction) {
-    int turnTime = 1000;
-    int forwardTime = 1000;
+    int turnTime = 600;
+    int forwardTime = 1200;
     switch(direction) {
       case 'L':
       case 'l':
@@ -302,6 +302,7 @@ void fixRotation() {
     int fDist;
     //printf("Left: %d   Right: %d\n", lDist, rDist);
     char smaller = getSmaller(lDist, rDist);
+    int count = 0;
 
     //Straighten out.
     int smallerDist = getDistance(smaller);
@@ -310,14 +311,20 @@ void fixRotation() {
     printf("Attempting to rotate\n");
     printf("     Left: %d, Right: %d, smaller: %c\n", lDist, rDist, smaller);
     do {
+        count = count + 1;
         rotate(smaller, rotationDelay);
         lastSmallerDist = smallerDist;
         smallerDist = getDistance(smaller);
         fDist = getDistance('f');
         printf("         %cDist: %d, last-%cDist: %d, fDist: %d\n", smaller, smallerDist, smaller, lastSmallerDist, fDist);
-    } while (smallerDist <= lastSmallerDist || fDist < 10);
+    } while ((smallerDist <= lastSmallerDist || fDist < 5) && count < 45);
     equalPower(0);
     delay(20);
+    if (getDistance('l') == 25 && getDistance('r') == 25) {
+      printf("infinite rotate distance, moving forwards a bit\n");
+      equalPower(speed);
+      delay(200);
+    }
     //rotate(other(smaller), rotationDelay * 2);
     //equalPower(0);
     /*
@@ -515,6 +522,7 @@ void performAction(char action) {
         break;
       case 'F':
       case 'f':
+        fixRotation();
         performTurn('f');
         delay(25);
         driveFoward();
